@@ -13,6 +13,8 @@ public class User {
 
     private Integer iseditor;
 
+    private String type;
+
     User(){
 
     }
@@ -67,4 +69,11 @@ public class User {
     }
 
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 }
