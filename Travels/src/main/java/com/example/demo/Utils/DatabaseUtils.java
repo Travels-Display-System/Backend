@@ -18,7 +18,6 @@ public class DatabaseUtils {
 
         //执行HTTP请求
         ResponseEntity<String> postForEntity = client.postForEntity(url, requestEntity, String.class);
-
         return postForEntity.getBody();
     }
 
@@ -29,4 +28,23 @@ public class DatabaseUtils {
         return getForEntity.getBody();
     }
 
+    public static void sendPutRequest(String url, String postContent) {
+        RestTemplate client = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        HttpMethod method = HttpMethod.PUT;
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        //将请求头部和参数合成一个请求
+        HttpEntity<String> requestEntity = new HttpEntity<>(postContent, headers);
+
+        //执行HTTP请求
+       client.put(url, requestEntity, String.class);
+    }
+
+    public static void sendDeleteRequest(String url) {
+        RestTemplate client = new RestTemplate();
+
+        //执行HTTP请求
+        client.delete(url, String.class);
+    }
 }

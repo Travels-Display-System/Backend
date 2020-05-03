@@ -5,10 +5,7 @@ import com.example.demo.Service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,6 +24,7 @@ public class UserController {
     public List<User> getUserAll() throws JsonProcessingException{
         return userService.getUserAll();
     }
+
     @GetMapping(value = "user/query")
     public User getUser(@RequestParam(value = "username", required = false) String username,
                           @RequestParam(value = "id", required = false) Long id) throws JsonProcessingException{
@@ -35,5 +33,13 @@ public class UserController {
         return userService.getUser(username,id);
     }
 
+    @PostMapping(value = "user/newUser")
+    public void modifyUser(@RequestBody User user) throws JsonProcessingException {
+        userService.modifyUser(user);
+    }
 
+    @PostMapping(value = "user/delete")
+    public void deleteUser(@RequestBody User user) throws JsonProcessingException{
+        userService.deleteUser(user);
+    }
 }
