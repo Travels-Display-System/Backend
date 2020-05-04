@@ -17,7 +17,6 @@ public class KeywordService {
            String postContent="{\"keyword\":\""+keyword+"\"}";
            ObjectMapper mapper = new ObjectMapper();
            String result=DatabaseUtils.sendPostRequest(Url, postContent);
-//           System.out.print(result);
         return mapper.readValue( result, Keyword.class);
 
     }

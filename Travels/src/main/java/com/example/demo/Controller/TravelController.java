@@ -19,8 +19,6 @@ public class TravelController {
     @PostMapping(value = "travel")
     public Travel createTravel(@RequestParam(value = "username") String username,
                                 @RequestBody Travel travel) throws JsonProcessingException {
-        System.out.print(travel.keywordList);
-        System.out.print(username);
         return travelService.createTravel(username,travel);
     }
 }
