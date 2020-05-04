@@ -41,8 +41,9 @@ public class UserService {
         if(username!=null){
             Url+="?User.username="+username;
             String result = DatabaseUtils.sendGetRequest(Url);
-//            System.out.print(result);
-//            System.out.print(result.substring(result.indexOf("["),result.lastIndexOf("]")+1));
+            if(result.equals("{}")){
+                return null;
+            }
             List<User> users=mapper.readValue(result.substring(result.indexOf("["),result.lastIndexOf("]")+1) , new TypeReference<List<User>>(){/**/});
             return users.get(0);
         }

@@ -15,8 +15,9 @@ public class UserController {
     private UserService userService;
 
     @PostMapping(value = "user")
-    public User addUser(@RequestParam(value = "username", required = true) String username,
-                        @RequestParam(value = "password", required = true) String password) throws JsonProcessingException {
+    public User addUser(@RequestParam(value = "username", required = false) String username,
+                        @RequestParam(value = "password", required = false) String password) throws JsonProcessingException {
+        System.out.print(username);
         return userService.addUser(username,password);
     }
 
@@ -33,12 +34,12 @@ public class UserController {
         return userService.getUser(username,id);
     }
 
-    @PostMapping(value = "user/newUser")
+    @PostMapping(value = "user/modifyUser")
     public void modifyUser(@RequestBody User user) throws JsonProcessingException {
         userService.modifyUser(user);
     }
 
-    @PostMapping(value = "user/delete")
+    @PostMapping(value = "user/deleteUser")
     public void deleteUser(@RequestBody User user) throws JsonProcessingException{
         userService.deleteUser(user);
     }
