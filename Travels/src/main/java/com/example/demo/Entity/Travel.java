@@ -17,14 +17,14 @@ public class Travel  implements Serializable {
 
     private String content;
 
-    //审核状态：0为未审核，1为审核中，2为审核通过，3为审核未通过
+    //审核状态：0为未审核(未提交），1为审核中，2为审核通过，3为审核未通过
     private Integer state;
 
     private String timestamp;
 
     private String advice;
 
-    private Long userId;
+    private String  username;
 
     private  String type;
 
@@ -74,12 +74,12 @@ public class Travel  implements Serializable {
         this.advice = advice;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUserId(String username) {
+        this.username = username;
     }
 
     public String getTitle() {

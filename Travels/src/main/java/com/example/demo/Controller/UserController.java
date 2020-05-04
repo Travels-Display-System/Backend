@@ -17,7 +17,6 @@ public class UserController {
     @PostMapping(value = "user")
     public User addUser(@RequestParam(value = "username", required = false) String username,
                         @RequestParam(value = "password", required = false) String password) throws JsonProcessingException {
-        System.out.print(username);
         return userService.addUser(username,password);
     }
 
@@ -29,8 +28,6 @@ public class UserController {
     @GetMapping(value = "user/query")
     public User getUser(@RequestParam(value = "username", required = false) String username,
                           @RequestParam(value = "id", required = false) Long id) throws JsonProcessingException{
-        System.out.print(username);
-        System.out.print(id);
         return userService.getUser(username,id);
     }
 
