@@ -21,7 +21,8 @@ public class KeywordService {
 
     }
 
-//    public Keyword getKeyword(){
-//
-//    }
+    public void deleteKeyword(Long id){
+        String Url="http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Keywords/"+id.toString();
+        DatabaseUtils.sendDeleteRequest(Url);
+    }
 }

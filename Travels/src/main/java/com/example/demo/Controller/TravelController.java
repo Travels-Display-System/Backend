@@ -13,6 +13,8 @@ public class TravelController {
     @Autowired
     private TravelService travelService;
 
+    //travel中需要包含title、content、username、state
+    //state：0为未审核(未提交），1为审核中，2为审核通过，3为审核未通过
     @PostMapping(value = "travel")
     public Travel createTravel(@RequestBody Travel travel) throws JsonProcessingException {
         return travelService.createTravel(travel);
@@ -23,23 +25,38 @@ public class TravelController {
         return travelService.getTravelAll();
     }
 
+    //查询：username、title、keyword为模糊查询，state为准确查询
     @GetMapping(value = "travel/query")
     public List<Travel> getTravel(@RequestParam(value = "username",required = false) String username,
                                   @RequestParam(value = "title",required = false) String title,
-                                  @RequestParam(value = "keyword",required = false) String keyword) throws JsonProcessingException{
-        return travelService.getTravel(username,title,keyword);
+                                  @RequestParam(value = "keyword",required = false) String keyword,
+                                  @RequestParam(value = "state",required = false) Integer state) throws JsonProcessingException{
+        return travelService.getTravel(username,title,keyword,state);
     }
+
     @GetMapping(value = "travel/{id}")
     public Travel getTravelById(@PathVariable("id") Long id) throws JsonProcessingException {
         return travelService.getTravelById(id);
     }
-    @PostMapping(value = "travel/advice")
-    public void travelAdvice(@RequestBody Travel travel)throws JsonProcessingException{
-        travelService.travelAdvice(travel);
+
+    //修改title、content、keyword
+    //travel中必须包含id
+    @PostMapping(value = "travel/change")
+    public void travelChange(@RequestBody Travel travel)throws JsonProcessingException{
+        travelService.travelChange(travel);
     }
 
+    //改state
+    //travel中必须包含id
     @PostMapping(value = "travel/state")
     public void travelState(@RequestBody Travel travel)throws JsonProcessingException{
         travelService.travelState(travel);
+    }
+
+    //删除travel
+    //travel中必须包含id
+    @PostMapping(value = "travel/deletetravel")
+    public void deleteTravel(@RequestBody Travel travel)throws JsonProcessingException{
+        travelService.deletetravel(travel);
     }
 }
