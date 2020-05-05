@@ -221,7 +221,6 @@ public class TravelService {
         Travel oldtravel = getTravelById(id);
         List<Keyword> oldkeywords=oldtravel.getKeywordList();
 
-
         String postContent="{\"title\":\""+oldtravel.getTitle()
                 +"\", \"content\":\""+oldtravel.getContent()
                 +"\", \"username\":\""+oldtravel.getUsername()
