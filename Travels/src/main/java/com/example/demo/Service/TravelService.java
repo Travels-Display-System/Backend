@@ -69,7 +69,7 @@ public class TravelService {
         return newTravel;
     }
 
-    public List<Travel> getTravelAll() throws JsonProcessingException {
+    public List<Travel> getTravelAll(Integer page) throws JsonProcessingException {
         String Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel";
         String result=DatabaseUtils.sendGetRequest(Url);
         String [] strtravels=result.substring(result.indexOf("[")+1,result.lastIndexOf("]")).split("]},");
@@ -92,10 +92,18 @@ public class TravelService {
                 return o2.getTimestamp().compareTo(o1.getTimestamp());
             }
         });
-        return travels;
+        Integer begin=(page-1)*20+1;
+        Integer end=begin+20;
+        if(travels.size()<begin){
+            return null;
+        }
+        if(travels.size()<end){
+            end=travels.size();
+        }
+        return travels.subList(begin,end);
     }
 
-    public List<Travel> getTravel(String username, String title, String keyword, Integer state) throws JsonProcessingException {
+    public List<Travel> getTravel(String username, String title, String keyword, Integer state, Integer page) throws JsonProcessingException {
         String Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel";
         if(username!=null){
             User user=userService.getUser(username,null);
@@ -130,8 +138,15 @@ public class TravelService {
                 return o2.getTimestamp().compareTo(o1.getTimestamp());
             }
         });
-
-        return travels;
+        Integer begin=(page-1)*20+1;
+        Integer end=begin+20;
+        if(travels.size()<begin){
+            return null;
+        }
+        if(travels.size()<end){
+            end=travels.size();
+        }
+        return travels.subList(begin,end);
     }
 
     public Travel getTravelById(Long id) throws JsonProcessingException {

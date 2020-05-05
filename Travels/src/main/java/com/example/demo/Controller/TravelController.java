@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.List;
 
 @RestController
@@ -21,8 +22,8 @@ public class TravelController {
     }
 
     @GetMapping(value = "travel")
-    public List<Travel> getTravelAll()throws JsonProcessingException{
-        return travelService.getTravelAll();
+    public List<Travel> getTravelAll(@RequestParam(value = "page", defaultValue = "1")Integer page)throws JsonProcessingException{
+        return travelService.getTravelAll(page);
     }
 
     //查询：username、title、keyword为模糊查询，state为准确查询
@@ -30,8 +31,9 @@ public class TravelController {
     public List<Travel> getTravel(@RequestParam(value = "username",required = false) String username,
                                   @RequestParam(value = "title",required = false) String title,
                                   @RequestParam(value = "keyword",required = false) String keyword,
-                                  @RequestParam(value = "state",required = false) Integer state) throws JsonProcessingException{
-        return travelService.getTravel(username,title,keyword,state);
+                                  @RequestParam(value = "state",required = false) Integer state,
+                                  @RequestParam(value = "page", defaultValue = "1")Integer page) throws JsonProcessingException{
+        return travelService.getTravel(username,title,keyword,state,page);
     }
 
     @GetMapping(value = "travel/{id}")
