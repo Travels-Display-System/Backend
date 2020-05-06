@@ -77,6 +77,9 @@ public class TravelService {
     public List<Travel> getTravelAll(Integer page) throws JsonProcessingException {
         String Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel";
         String result=DatabaseUtils.sendGetRequest(Url);
+        if(result.equals("{}")){
+            return null;
+        }
         String [] strtravels=result.substring(result.indexOf("[")+1,result.lastIndexOf("]")).split("]},");
         ObjectMapper mapper = new ObjectMapper();
         List<Travel> travels=new ArrayList<>();
@@ -123,11 +126,16 @@ public class TravelService {
             Url+="?Travel.state="+state;
         }
         String result=DatabaseUtils.sendGetRequest(Url);
+        System.out.print(result);
+        if(result.equals("{}")){
+            return null;
+        }
         String [] strtravels=result.substring(result.indexOf("[")+1,result.lastIndexOf("]")).split("]},");
         ObjectMapper mapper = new ObjectMapper();
         List<Travel> travels=new ArrayList<>();
         for(String strtravel:strtravels){
             strtravel=strtravel+"]}";
+            System.out.print(strtravel);
             Travel newTravel=mapper.readValue(strtravel , Travel.class);
             List<Keyword> newKeywordList=mapper.readValue(strtravel.substring(strtravel.indexOf("["),strtravel.lastIndexOf("]")+1),new TypeReference<List<Keyword>>(){});
             newTravel.keywordList=newKeywordList;
@@ -154,6 +162,9 @@ public class TravelService {
     public Travel getTravelById(Long id) throws JsonProcessingException {
         String Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel/"+id.toString();
         String result=DatabaseUtils.sendGetRequest(Url);
+        if(result.equals("[]")){
+            return null;
+        }
         ObjectMapper mapper = new ObjectMapper();
         Travel newTravel=mapper.readValue(result , Travel.class);
         List<Keyword> newKeywordList=mapper.readValue(result.substring(result.indexOf("["),result.lastIndexOf("]")+1),new TypeReference<List<Keyword>>(){});
@@ -323,6 +334,9 @@ public class TravelService {
     public List<Map> getTravelSimple(String username, String title, String keyword, Integer state, Integer page) throws JsonProcessingException {
         List<Map> result=new ArrayList<>();
         List<Travel> travels=getTravel(username,title,keyword,state,page);
+        if(travels==null){
+            return null;
+        }
         for(Travel travel: travels){
             Map<String,Object> map=new HashMap<>();
             map.put("id",travel.getId());
