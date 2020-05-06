@@ -60,10 +60,12 @@ public class WebSocketServer {
      */
     public void sendMessage(String username,String jsonMsg){
         Session session=onlineSessions.get(username);
-        try {
-            session.getBasicRemote().sendText(jsonMsg);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(session!=null) {
+            try {
+                session.getBasicRemote().sendText(jsonMsg);
+            } catch (IOException e) {
+               System.out.print("用户不在线");
+            }
         }
     }
 
