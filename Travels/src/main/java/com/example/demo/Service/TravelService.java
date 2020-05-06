@@ -4,6 +4,7 @@ import com.example.demo.Entity.Keyword;
 import com.example.demo.Entity.Travel;
 import com.example.demo.Entity.User;
 import com.example.demo.Utils.DatabaseUtils;
+import com.example.demo.WebSocketServer;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,6 +24,8 @@ public class TravelService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private WebSocketServer webSocketServer;//注入socket服务
 
     public Travel createTravel(Travel travel) throws JsonProcessingException {
         String title=travel.getTitle();
@@ -59,7 +62,6 @@ public class TravelService {
                 +", \"timestamp\":\""+timestamp
                 +"\", \"state\":"+state.toString()+"}";
 
-//        System.out.print(postContent);
         //发送请求并返回实体
         ObjectMapper mapper = new ObjectMapper();
         String result=DatabaseUtils.sendPostRequest(Url, postContent);
@@ -83,9 +85,6 @@ public class TravelService {
             newTravel.keywordList=newKeywordList;
             travels.add(newTravel);
         }
-//        List<Travel> travels=new ArrayList<>();
-//        ObjectMapper mapper = new ObjectMapper();
-//        travels=mapper.readValue(result.substring(result.indexOf("["),result.lastIndexOf("]")+1),new TypeReference<List<Travel>>(){});
         travels.sort(new Comparator<Travel>() {
             @Override
             public int compare(Travel o1, Travel o2) {
@@ -202,6 +201,8 @@ public class TravelService {
             Long tmpid=oldkeyword.getId();
             keywordService.deleteKeyword(tmpid);
         }
+
+
     }
 
     public void travelState(Travel travel) throws JsonProcessingException {
@@ -258,6 +259,19 @@ public class TravelService {
         //删除travel
        Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel/"+id.toString();
        DatabaseUtils.sendDeleteRequest(Url);
+    }
+
+    public List<Map> getTravelSimple(String username, String title, String keyword, Integer state, Integer page) throws JsonProcessingException {
+        List<Map> result=new ArrayList<>();
+        List<Travel> travels=getTravel(username,title,keyword,state,page);
+        for(Travel travel: travels){
+            Map<String,Object> map=new HashMap<>();
+            map.put("id",travel.getId());
+            map.put("title",travel.getTitle());
+            map.put("username",travel.getUsername());
+            result.add(map);
+        }
+        return result;
     }
 }
 
