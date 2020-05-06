@@ -38,6 +38,9 @@ public class TravelService {
             System.out.print("User does not exit");
             return null;
         }
+        if(state==null){
+            state=0;
+        }
         String Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel";
         //创建关键词
         List<Long> keywordIds = new ArrayList<>();
@@ -271,13 +274,13 @@ public class TravelService {
         Map<String,Object> map=new HashMap<>();
         if(state==2){
             map.put("username",newtravel.getContent());
-            map.put("massage","您的游记"+newtravel.getTitle()+"审核已通过");
+            map.put("massage","您的游记 "+newtravel.getTitle()+" 审核已通过");
             map.put("title",newtravel.getTitle());
             map.put("travelId",id);
         }
         if(state==3){
             map.put("username",newtravel.getContent());
-            map.put("massage","您的游记"+newtravel.getTitle()+"审核未通过");
+            map.put("massage","您的游记 "+newtravel.getTitle()+" 审核未通过");
             map.put("title",newtravel.getTitle());
             map.put("travelId",id);
         }
@@ -287,6 +290,9 @@ public class TravelService {
     public void deletetravel(Travel travel) throws JsonProcessingException {
         Long id = travel.getId();
         Travel oldtravel = getTravelById(id);
+        if(oldtravel==null){
+            return;
+        }
         List<Keyword> oldkeywords=oldtravel.getKeywordList();
 
         String postContent="{\"title\":\""+oldtravel.getTitle()
@@ -295,12 +301,13 @@ public class TravelService {
                 +"\",\"keywords\":[]"
                 +",\"advice\":\""+oldtravel.getAdvice()
                 +"\", \"timestamp\":\""+oldtravel.getTimestamp()
-                +"\", \"state\":"+oldtravel.getState()+"}";
+                +"\", \"state\":0}";
 
         System.out.print(postContent);
         String Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel/"+id.toString();
-        ObjectMapper mapper = new ObjectMapper();
+
         DatabaseUtils.sendPutRequest(Url, postContent);
+
 
         //删除原有的keyword
         for(Keyword oldkeyword:oldkeywords){
@@ -329,6 +336,9 @@ public class TravelService {
     public void deleteTravelByAdmin(Travel travel) throws JsonProcessingException {
         Long id = travel.getId();
         Travel oldtravel = getTravelById(id);
+        if(oldtravel==null){
+            return;
+        }
         List<Keyword> oldkeywords=oldtravel.getKeywordList();
 
         String postContent="{\"title\":\""+oldtravel.getTitle()
@@ -337,11 +347,10 @@ public class TravelService {
                 +"\",\"keywords\":[]"
                 +",\"advice\":\""+oldtravel.getAdvice()
                 +"\", \"timestamp\":\""+oldtravel.getTimestamp()
-                +"\", \"state\":"+oldtravel.getState()+"}";
+                +"\", \"state\":0}";
 
         System.out.print(postContent);
         String Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel/"+id.toString();
-        ObjectMapper mapper = new ObjectMapper();
         DatabaseUtils.sendPutRequest(Url, postContent);
 
         //删除原有的keyword
@@ -356,9 +365,10 @@ public class TravelService {
 
         Map<String,Object> map=new HashMap<>();
         map.put("username",travel.getContent());
-        map.put("massage","您的游记"+oldtravel.getTitle()+"已被管理员删除");
+        map.put("massage","您的游记 "+oldtravel.getTitle()+" 已被管理员删除");
         map.put("title",oldtravel.getTitle());
         map.put("travelId",id);
+
         webSocketServer.sendMessage(oldtravel.getUsername(),map.toString());
     }
 }

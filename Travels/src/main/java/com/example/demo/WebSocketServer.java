@@ -27,7 +27,6 @@ public class WebSocketServer {
         System.out.println(onlineSessions);
     }
 
-
     @OnMessage
     public void onMessage(Session session, String jsonStr) {
         try {
@@ -41,7 +40,7 @@ public class WebSocketServer {
     @OnClose
     public void onClose(Session session) {
         Collection<Session> col = onlineSessions.values();
-        while(true == col.contains(session)) {
+        while(col.contains(session)) {
             col.remove(session);
         }
 //       onlineSessions.remove(session.getId());
