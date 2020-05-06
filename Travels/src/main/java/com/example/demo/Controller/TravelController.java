@@ -58,12 +58,7 @@ public class TravelController {
         travelService.travelChange(travel);
     }
 
-    //改state
-    //travel中必须包含id
-    @PostMapping(value = "travel/state")
-    public void travelState(@RequestBody Travel travel)throws JsonProcessingException{
-        travelService.travelState(travel);
-    }
+
 
     //删除travel
     //travel中必须包含id
@@ -71,4 +66,26 @@ public class TravelController {
     public void deleteTravel(@RequestBody Travel travel)throws JsonProcessingException{
         travelService.deletetravel(travel);
     }
+
+    //编辑改state
+    //travel中必须包含id
+    @PostMapping(value = "travel/state")
+    public void travelState(@RequestBody Travel travel)throws JsonProcessingException{
+        travelService.travelState(travel);
+    }
+
+    //编辑修改advice
+    //travel中必须包含id
+    @PostMapping(value = "travel/change/admin")
+    public void adviceByAdmin(@RequestBody Travel travel)throws JsonProcessingException{
+        travelService.adviceByAdmin(travel);
+    }
+
+    //管理员删除travel
+    //travel中必须包含id
+    @PostMapping(value = "travel/deletetravel")
+    public void deleteTravelByAdmin(@RequestBody Travel travel)throws JsonProcessingException{
+        travelService.deleteTravelByAdmin(travel);
+    }
+    
 }
