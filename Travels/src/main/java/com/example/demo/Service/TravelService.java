@@ -97,7 +97,7 @@ public class TravelService {
                 return o2.getTimestamp().compareTo(o1.getTimestamp());
             }
         });
-        Integer begin=(page-1)*20+1;
+        Integer begin=(page-1)*20;
         Integer end=begin+20;
         if(travels.size()<begin){
             return null;
@@ -148,7 +148,7 @@ public class TravelService {
                 return o2.getTimestamp().compareTo(o1.getTimestamp());
             }
         });
-        Integer begin=(page-1)*20+1;
+        Integer begin=(page-1)*20;
         Integer end=begin+20;
         if(travels.size()<begin){
             return null;
@@ -219,7 +219,6 @@ public class TravelService {
 
     }
 
-    //
     public void adviceByAdmin(Travel travel) throws JsonProcessingException {
         Long id = travel.getId();
         Travel oldtravel = getTravelById(id);

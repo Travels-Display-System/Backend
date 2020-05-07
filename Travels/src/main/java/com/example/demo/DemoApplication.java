@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.Properties;
 
+
 @SpringBootApplication(exclude= {DataSourceAutoConfiguration.class})
 public class DemoApplication {
 

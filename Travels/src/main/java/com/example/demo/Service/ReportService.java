@@ -1,6 +1,6 @@
 package com.example.demo.Service;
 
-import com.example.demo.Entity.Comment;
+
 import com.example.demo.Entity.Report;
 import com.example.demo.Utils.DatabaseUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
