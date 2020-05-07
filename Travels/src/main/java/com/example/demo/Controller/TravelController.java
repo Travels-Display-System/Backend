@@ -1,6 +1,7 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Entity.Travel;
+import com.example.demo.Entity.User;
 import com.example.demo.Service.TravelService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,9 @@ public class TravelController {
     }
 
     @GetMapping(value = "travel")
-    public List<Travel> getTravelAll(@RequestParam(value = "page", defaultValue = "1")Integer page)throws JsonProcessingException{
-        return travelService.getTravelAll(page);
+    public List<Travel> getTravelAll(@RequestParam(value = "page", defaultValue = "1")Integer page,
+                                     @RequestParam(value = "userid",required = false)Long userid)throws JsonProcessingException{
+        return travelService.getTravelAll(page,userid);
     }
 
     //查询：username、title、keyword为模糊查询，state为准确查询
@@ -32,8 +34,9 @@ public class TravelController {
                                   @RequestParam(value = "title",required = false) String title,
                                   @RequestParam(value = "keyword",required = false) String keyword,
                                   @RequestParam(value = "state",required = false) Integer state,
-                                  @RequestParam(value = "page", defaultValue = "1")Integer page) throws JsonProcessingException{
-        return travelService.getTravel(username, title, keyword, state, page);
+                                  @RequestParam(value = "page", defaultValue = "1")Integer page,
+                                  @RequestParam(value = "userid",required = false)Long userid) throws JsonProcessingException{
+        return travelService.getTravel(username, title, keyword, state, page,userid);
     }
 
     //查询：username、title、keyword为模糊查询，state为准确查询,只返回username/title/id
@@ -42,8 +45,9 @@ public class TravelController {
                                      @RequestParam(value = "title",required = false) String title,
                                      @RequestParam(value = "keyword",required = false) String keyword,
                                      @RequestParam(value = "state",required = false) Integer state,
-                                     @RequestParam(value = "page", defaultValue = "1")Integer page) throws JsonProcessingException{
-        return travelService.getTravelSimple(username, title, keyword, state, page);
+                                     @RequestParam(value = "page", defaultValue = "1")Integer page,
+                                     @RequestParam(value = "userid",required = false)Long userid) throws JsonProcessingException{
+        return travelService.getTravelSimple(username, title, keyword, state, page,userid);
     }
 
     @GetMapping(value = "travel/{id}")
@@ -85,6 +89,12 @@ public class TravelController {
     @PostMapping(value = "travel/deletetravel/admin")
     public void deleteTravelByAdmin(@RequestBody Travel travel)throws JsonProcessingException{
         travelService.deleteTravelByAdmin(travel);
+    }
+
+    @PostMapping(value = "travel/test")
+    public void test(@RequestBody User user)throws JsonProcessingException{
+        travelService.UserLabel();
+        travelService.similarUser(user);
     }
 
 }

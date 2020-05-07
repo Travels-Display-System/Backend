@@ -61,6 +61,21 @@ public class LikeService {
         return mapper.readValue(result.substring(result.indexOf("["),result.lastIndexOf("]")+1),new TypeReference<List<Like>>(){});
     }
 
+    public List<Like> getLikeByuserid(Long userid) throws JsonProcessingException {
+        String Url="http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Like";
+
+        if(userid!=null){
+            Url+="/?Like.userid="+userid.toString();
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        String result=DatabaseUtils.sendGetRequest(Url);
+//        System.out.print(result);
+        if (result.equals("{}")) {
+            return null;
+        }
+        return mapper.readValue(result.substring(result.indexOf("["),result.lastIndexOf("]")+1),new TypeReference<List<Like>>(){});
+    }
+
     public void deleteLike(Like like){
         Long id=like.getId();
         String Url="http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Like/"+id.toString();

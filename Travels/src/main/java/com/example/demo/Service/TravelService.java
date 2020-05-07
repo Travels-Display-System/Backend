@@ -1,19 +1,21 @@
 package com.example.demo.Service;
 
 import com.example.demo.Entity.Keyword;
+import com.example.demo.Entity.Like;
 import com.example.demo.Entity.Travel;
 import com.example.demo.Entity.User;
 import com.example.demo.Utils.DatabaseUtils;
 import com.example.demo.WebSocketServer;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.print.DocFlavor;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class TravelService {
@@ -26,6 +28,12 @@ public class TravelService {
 
     @Autowired
     private WebSocketServer webSocketServer;//注入socket服务
+
+    @Autowired
+    private LikeService likeService;
+
+    private static Map<User,List<String>> user_label = new ConcurrentHashMap<>();
+    private static Map<String,List<String>> recommend_keywords=new ConcurrentHashMap<>();
 
     public Travel createTravel(Travel travel) throws JsonProcessingException {
         String title=travel.getTitle();
@@ -74,7 +82,8 @@ public class TravelService {
         return newTravel;
     }
 
-    public List<Travel> getTravelAll(Integer page) throws JsonProcessingException {
+    public List<Travel> getTravelAll(Integer page,Long userid) throws JsonProcessingException {
+
         String Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel";
         String result=DatabaseUtils.sendGetRequest(Url);
         if(result.equals("{}")){
@@ -83,6 +92,9 @@ public class TravelService {
         String [] strtravels=result.substring(result.indexOf("[")+1,result.lastIndexOf("]")).split("]},");
         ObjectMapper mapper = new ObjectMapper();
         List<Travel> travels=new ArrayList<>();
+        Map<Travel,Integer> travel_score=new HashMap<>();
+        User user=userService.getUser(null,userid);
+
         for(String strtravel:strtravels){
             strtravel=strtravel+"]}";
             Travel newTravel=mapper.readValue(strtravel , Travel.class);
@@ -90,11 +102,34 @@ public class TravelService {
             List<Keyword> newKeywordList=mapper.readValue(strtravel.substring(strtravel.indexOf("["),strtravel.lastIndexOf("]")+1),new TypeReference<List<Keyword>>(){});
             newTravel.keywordList=newKeywordList;
             travels.add(newTravel);
+            Integer score=0;
+            //没有输入userid就不筛选
+            if(user==null){
+                List<Like> likes=likeService.getLike(newTravel.getId());
+                if(likes!=null) score+=likes.size();
+                travel_score.put(newTravel,score);
+                continue;
+            }
+            String username=user.getUsername();
+            if(recommend_keywords.get(username)==null){
+                similarUser(user);
+            }
+            List<String> rk=recommend_keywords.get(username);
+            if(rk.size()!=0) {
+                for (Keyword keyword : newKeywordList) {
+                    if (rk.contains(keyword.getKeyword())) {
+                        score += 1;
+                    }
+                }
+            }
+            List<Like> likes=likeService.getLike(newTravel.getId());
+            if(likes!=null) score+=likes.size();
+            travel_score.put(newTravel,score);
         }
         travels.sort(new Comparator<Travel>() {
             @Override
             public int compare(Travel o1, Travel o2) {
-                return o2.getTimestamp().compareTo(o1.getTimestamp());
+                return o2.getTimestamp().compareTo(o1.getTimestamp())+travel_score.get(o2)-travel_score.get(o1);
             }
         });
         Integer begin=(page-1)*20;
@@ -108,7 +143,7 @@ public class TravelService {
         return travels.subList(begin,end);
     }
 
-    public List<Travel> getTravel(String username, String title, String keyword, Integer state, Integer page) throws JsonProcessingException {
+    public List<Travel> getTravel(String username, String title, String keyword, Integer state, Integer page,Long userid) throws JsonProcessingException {
         String Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel";
         if(username!=null){
             User user=userService.getUser(username,null);
@@ -133,19 +168,44 @@ public class TravelService {
         String [] strtravels=result.substring(result.indexOf("[")+1,result.lastIndexOf("]")).split("]},");
         ObjectMapper mapper = new ObjectMapper();
         List<Travel> travels=new ArrayList<>();
+        Map<Travel,Integer> travel_score=new HashMap<>();
+        User user=userService.getUser(null,userid);
+
         for(String strtravel:strtravels){
             strtravel=strtravel+"]}";
-            System.out.print(strtravel);
             Travel newTravel=mapper.readValue(strtravel , Travel.class);
+            System.out.print(strtravel);
             List<Keyword> newKeywordList=mapper.readValue(strtravel.substring(strtravel.indexOf("["),strtravel.lastIndexOf("]")+1),new TypeReference<List<Keyword>>(){});
             newTravel.keywordList=newKeywordList;
             travels.add(newTravel);
+            Integer score=0;
+            //没有输入userid就不筛选
+            if(user==null){
+                List<Like> likes=likeService.getLike(newTravel.getId());
+                if(likes!=null) score+=likes.size();
+                travel_score.put(newTravel,score);
+                continue;
+            }
+            String usernamenow=user.getUsername();
+            if(recommend_keywords.get(usernamenow)==null){
+                similarUser(user);
+            }
+            List<String> rk=recommend_keywords.get(usernamenow);
+            if(rk.size()!=0) {
+                for (Keyword keyword1 : newKeywordList) {
+                    if (rk.contains(keyword1.getKeyword())) {
+                        score += 1;
+                    }
+                }
+            }
+            List<Like> likes=likeService.getLike(newTravel.getId());
+            if(likes!=null) score+=likes.size();
+            travel_score.put(newTravel,score);
         }
-
         travels.sort(new Comparator<Travel>() {
             @Override
             public int compare(Travel o1, Travel o2) {
-                return o2.getTimestamp().compareTo(o1.getTimestamp());
+                return o2.getTimestamp().compareTo(o1.getTimestamp())+travel_score.get(o2)-travel_score.get(o1);
             }
         });
         Integer begin=(page-1)*20;
@@ -162,7 +222,7 @@ public class TravelService {
     public Travel getTravelById(Long id) throws JsonProcessingException {
         String Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel/"+id.toString();
         String result=DatabaseUtils.sendGetRequest(Url);
-        if(result.equals("[]")){
+        if(result.equals("[]")||result.equals("")||result.equals("{}")){
             return null;
         }
         ObjectMapper mapper = new ObjectMapper();
@@ -256,6 +316,7 @@ public class TravelService {
 
         webSocketServer.sendMessage(oldtravel.getUsername(),map.toString());
     }
+
     public void travelState(Travel travel) throws JsonProcessingException {
         Long id = travel.getId();
         Travel newtravel = getTravelById(id);
@@ -330,9 +391,9 @@ public class TravelService {
        DatabaseUtils.sendDeleteRequest(Url);
     }
 
-    public List<Map> getTravelSimple(String username, String title, String keyword, Integer state, Integer page) throws JsonProcessingException {
+    public List<Map> getTravelSimple(String username, String title, String keyword, Integer state, Integer page,Long userid) throws JsonProcessingException {
         List<Map> result=new ArrayList<>();
-        List<Travel> travels=getTravel(username,title,keyword,state,page);
+        List<Travel> travels=getTravel(username,title,keyword,state,page,userid);
         if(travels==null){
             return null;
         }
@@ -383,6 +444,148 @@ public class TravelService {
         map.put("travelId",id);
 
         webSocketServer.sendMessage(oldtravel.getUsername(),map.toString());
+    }
+
+    public void UserLabel() throws JsonProcessingException {
+//        if(user_label.size()!=0) return;
+        List<User> users=userService.getUserAll();
+        for(User user:users){
+            List<String> userKeyword=new ArrayList<>();
+            Long userid=user.getId();
+            List<Like> likes=likeService.getLikeByuserid(userid);
+            if(likes==null) continue;
+            for(Like like:likes){
+                Long travelid=like.getTravelid();
+                Travel travel=getTravelById(travelid);
+                if(travel==null) continue;
+                List<Keyword> keywords=travel.getKeywordList();
+                if(keywords==null) continue;
+                for(Keyword k:keywords){
+                    userKeyword.add(k.getKeyword());
+                }
+            }
+            user_label.put(user,userKeyword);
+            System.out.print(user.getId().toString()+user.getUsername()+" :\n");
+            for(String k:userKeyword){
+                System.out.print(k+", ");
+            }
+            System.out.print("\n");
+        }
+        System.out.print("\n");
+    }
+
+    //计算用户相似度
+    public void similarUser(User user) throws JsonProcessingException {
+//        if(recommend_keywords.get(user.getUsername())!=null) return;
+        UserLabel();
+        int N=user_label.size();
+//        if(N==0){
+//            UserLabel();
+//            N=user_label.size();
+//        }
+        if(N==0) return;
+        int[][] sparseMatrix = new int[N][N];
+        //建立用户稀疏矩阵，用于用户相似度计算【相似度矩阵】
+        Map<String, Integer> userItemLength = new HashMap<>();
+        //存储每一个用户对应的不同物品总数 eg: A 3
+        Map<String, Map<String,Integer>> itemUserCollection = new HashMap<>();
+        //建立物品到用户的倒排表 eg: a A B
+        Set<String> items = new HashSet<>();
+        //辅助存储物品集合
+        Map<String, Integer> userID = new HashMap<>();
+        //辅助存储每一个用户的用户ID映射
+        Map<Integer, String> idUser = new HashMap<>();
+        //辅助存储每一个ID对应的用户映射
+        System.out.println("Input user--items maping infermation:<eg:A a b d>");
+        Set set = user_label.keySet();
+        int i=0;
+        for (Iterator iter = set.iterator(); iter.hasNext();i++){
+            User every_user=(User) iter.next();
+            System.out.print(every_user.getUsername()+" ");
+            //依次处理N个用户 输入数据 以空格间隔
+            List<String> keywords=user_label.get(every_user);
+            System.out.print(keywords.toString()+"\n");
+//            String[] user_item = scanner.nextLine().split(" ");
+            int length=keywords.size();
+//            int length = user_item.length;
+            userItemLength.put(every_user.getUsername(), length);
+            //eg: A 3
+            userID.put(every_user.getUsername(), i);
+            //用户ID与稀疏矩阵建立对应关系
+            idUser.put(i, every_user.getUsername());
+            //建立物品--用户倒排表
+            for (String keyword : keywords){
+                if(items.contains(keyword)){
+                    //如果已经包含对应的物品--用户映射，直接添加对应的用户
+                    if(itemUserCollection.get(keyword).get(every_user.getUsername())==null){
+                        itemUserCollection.get(keyword).put(every_user.getUsername(),1);
+                    }
+                    else{
+                        Integer num=itemUserCollection.get(keyword).get(every_user.getUsername());
+                        itemUserCollection.get(keyword).put(every_user.getUsername(),num+1);
+                    }
+                    System.out.print(every_user.getUsername()+" "+keyword+"\n");
+                    System.out.println(itemUserCollection.toString()+"\n");
+                } else{
+                    //否则创建对应物品--用户集合映射
+                    items.add(keyword);
+                    itemUserCollection.put(keyword, new HashMap<>());
+                    //创建物品--用户倒排关系
+                    itemUserCollection.get(keyword).put(every_user.getUsername(),1);
+                }
+            }
+        }
+        System.out.println(itemUserCollection.toString());
+        //计算相似度矩阵【稀疏】
+        Set<Map.Entry<String, Map<String,Integer>>> entrySet = itemUserCollection.entrySet();
+        Iterator<Map.Entry<String, Map<String,Integer>>> iterator = entrySet.iterator();
+        while(iterator.hasNext()){
+            Map<String,Integer> commonUsers = iterator.next().getValue();
+            Set entrySet1 = commonUsers.keySet();
+            for(Iterator iter = entrySet1.iterator(); iter.hasNext();)
+            {
+                String user_u = (String)iter.next();
+                Integer value = (Integer)commonUsers.get(user_u);
+                System.out.println(user_u+"===="+value);
+                for(Iterator iter1 = entrySet1.iterator(); iter1.hasNext();){
+                    String user_v = (String)iter1.next();
+                    Integer value1 = (Integer)commonUsers.get(user_v);
+                    if(user_u.equals(user_v)){
+                        continue;
+                    }
+                    sparseMatrix[userID.get(user_u)][userID.get(user_v)] += value*value1;
+                }
+            }
+        }
+        System.out.println(userItemLength.toString());
+        System.out.println("Input the user for recommendation:<eg:A>");
+        String recommendUser = user.getUsername();
+        System.out.println(userID.get(recommendUser));
+        //计算用户之间的相似度【余弦相似性】
+        int recommendUserId = userID.get(recommendUser);
+        for (int j = 0;j < sparseMatrix.length; j++) {
+            if(j != recommendUserId){
+                System.out.println(idUser.get(recommendUserId)+"--"+idUser.get(j)+"相似度:"+sparseMatrix[recommendUserId][j]/Math.sqrt(userItemLength.get(idUser.get(recommendUserId))*userItemLength.get(idUser.get(j))));
+            }
+        }
+        List<String> newkeyword=new ArrayList<>();
+        //计算指定用户recommendUser的物品推荐度
+        for (String item: items){
+            //遍历每一件物品
+            Map<String,Integer> users_map = itemUserCollection.get(item);
+            Set entrySet1 = users_map.keySet();
+            double itemRecommendDegree = 0.0;
+            for(Iterator iter = entrySet1.iterator(); iter.hasNext();) {
+                String user1 = (String) iter.next();
+                itemRecommendDegree += sparseMatrix[userID.get(recommendUser)][userID.get(user1)] / Math.sqrt(userItemLength.get(recommendUser) * userItemLength.get(user1));
+            }
+            if(itemRecommendDegree>=1)
+                newkeyword.add(item);
+            System.out.println("The item "+item+" for "+recommendUser +"'s recommended degree:"+itemRecommendDegree);
+
+        }
+        recommend_keywords.put(recommendUser,newkeyword);
+        System.out.print(recommend_keywords.toString());
     }
 }
 
