@@ -20,7 +20,7 @@ public class ReportService {
         }
         String postContent="{\"travelid\":"+report.getTravelid()
                             +",\"userid\":"+report.getUserid()
-                            +",\"content\":\""+report.getContent()+"\"}";
+                            +",\"" + "content\":\""+report.getContent()+"\"}";
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(DatabaseUtils.sendPostRequest(Url, postContent) , Report.class);
     }

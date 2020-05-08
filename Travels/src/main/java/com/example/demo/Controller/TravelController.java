@@ -54,18 +54,38 @@ public class TravelController {
 
     //作者查询：username为准确查询；
     // 编辑和管理员在不输入username的时候，获得所有travel
-    @GetMapping(value = "travel/query/self")
-    public List<Travel> getTravelSelf(@RequestParam(value = "username",required = false) String username,
+    //审核状态2
+    @GetMapping(value = "travel/query/self/yes")
+    public List<Travel> getTravelSelfyes(@RequestParam(value = "username",required = false) String username,
                                       @RequestParam(value = "page", defaultValue = "1")Integer page) throws JsonProcessingException{
-        return travelService.getTravelSelf(username,page);
+        return travelService.getTravelSelfyes(username,page);
+    }
+
+    //作者查询：username为准确查询；
+    // 编辑和管理员在不输入username的时候，获得所有travel
+    //审核状态0，1，3
+    @GetMapping(value = "travel/query/self/no")
+    public List<Travel> getTravelSelfno(@RequestParam(value = "username",required = false) String username,
+                                         @RequestParam(value = "page", defaultValue = "1")Integer page) throws JsonProcessingException{
+        return travelService.getTravelSelfno(username,page);
     }
 
     //作者查询：username为准确查询,只返回username/title/id；
     // 编辑和管理员在不输入username的时候，获得所有travel
-    @GetMapping(value = "travel/query/simple/self")
-    public List<Map> getTravelSimpleSelf(@RequestParam(value = "username",required = false) String username,
+    //审核状态2
+    @GetMapping(value = "travel/query/simple/self/yes")
+    public List<Map> getTravelSimpleSelfyes(@RequestParam(value = "username",required = false) String username,
                                          @RequestParam(value = "page", defaultValue = "1")Integer page) throws JsonProcessingException{
-        return travelService.getTravelSimpleSelf(username,page);
+        return travelService.getTravelSimpleSelfyes(username,page);
+    }
+
+    //作者查询：username为准确查询,只返回username/title/id；
+    // 编辑和管理员在不输入username的时候，获得所有travel
+    //审核状态0，1，3
+    @GetMapping(value = "travel/query/simple/self/no")
+    public List<Map> getTravelSimpleSelfno(@RequestParam(value = "username",required = false) String username,
+                                            @RequestParam(value = "page", defaultValue = "1")Integer page) throws JsonProcessingException{
+        return travelService.getTravelSimpleSelfno(username,page);
     }
 
     @GetMapping(value = "travel/{id}")

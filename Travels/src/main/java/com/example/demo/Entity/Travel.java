@@ -94,11 +94,5 @@ public class Travel  implements Serializable {
     public List<Keyword> getKeywordList(){return keywordList;}
     public void setKeywordList(List<Keyword> keywordList){this.keywordList=keywordList;}
 
-//    public Integer getHot() {
-//        return hot;
-//    }
-//
-//    public void setHot(Integer hot) {
-//        this.hot = hot;
-//    }
+
 }
