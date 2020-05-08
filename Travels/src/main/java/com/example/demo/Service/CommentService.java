@@ -48,7 +48,14 @@ public class CommentService {
         String Url="http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Comment/?Comment.travelid="+travelid.toString();
         ObjectMapper mapper = new ObjectMapper();
         String result=DatabaseUtils.sendGetRequest(Url);
-
+        if(result.equals("{}")) return null;
+        return mapper.readValue(result.substring(result.indexOf("["),result.lastIndexOf("]")+1),new TypeReference<List<Comment>>(){});
+    }
+    public List<Comment> getCommentByUserId(Long userid) throws JsonProcessingException {
+        String Url="http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Comment/?Comment.userid="+userid.toString();
+        ObjectMapper mapper = new ObjectMapper();
+        String result=DatabaseUtils.sendGetRequest(Url);
+        if(result.equals("{}")) return null;
         return mapper.readValue(result.substring(result.indexOf("["),result.lastIndexOf("]")+1),new TypeReference<List<Comment>>(){});
     }
 }

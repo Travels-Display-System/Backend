@@ -22,13 +22,14 @@ public class TravelController {
         return travelService.createTravel(travel);
     }
 
+    //含推荐
     @GetMapping(value = "travel")
     public List<Travel> getTravelAll(@RequestParam(value = "page", defaultValue = "1")Integer page,
                                      @RequestParam(value = "userid",required = false)Long userid)throws JsonProcessingException{
         return travelService.getTravelAll(page,userid);
     }
 
-    //查询：username、title、keyword为模糊查询，state为准确查询
+    //查询：username、title、keyword为模糊查询，state为准确查询，含推荐
     @GetMapping(value = "travel/query")
     public List<Travel> getTravel(@RequestParam(value = "username",required = false) String username,
                                   @RequestParam(value = "title",required = false) String title,
@@ -39,7 +40,7 @@ public class TravelController {
         return travelService.getTravel(username, title, keyword, state, page,userid);
     }
 
-    //查询：username、title、keyword为模糊查询，state为准确查询,只返回username/title/id
+    //查询：username、title、keyword为模糊查询，state为准确查询,只返回username/title/id，含推荐
     @GetMapping(value = "travel/query/simple")
     public List<Map> getTravelSimple(@RequestParam(value = "username",required = false) String username,
                                      @RequestParam(value = "title",required = false) String title,
@@ -48,6 +49,23 @@ public class TravelController {
                                      @RequestParam(value = "page", defaultValue = "1")Integer page,
                                      @RequestParam(value = "userid",required = false)Long userid) throws JsonProcessingException{
         return travelService.getTravelSimple(username, title, keyword, state, page,userid);
+    }
+
+
+    //作者查询：username为准确查询；
+    // 编辑和管理员在不输入username的时候，获得所有travel
+    @GetMapping(value = "travel/query/self")
+    public List<Travel> getTravelSelf(@RequestParam(value = "username",required = false) String username,
+                                      @RequestParam(value = "page", defaultValue = "1")Integer page) throws JsonProcessingException{
+        return travelService.getTravelSelf(username,page);
+    }
+
+    //作者查询：username为准确查询,只返回username/title/id；
+    // 编辑和管理员在不输入username的时候，获得所有travel
+    @GetMapping(value = "travel/query/simple/self")
+    public List<Map> getTravelSimpleSelf(@RequestParam(value = "username",required = false) String username,
+                                         @RequestParam(value = "page", defaultValue = "1")Integer page) throws JsonProcessingException{
+        return travelService.getTravelSimpleSelf(username,page);
     }
 
     @GetMapping(value = "travel/{id}")
@@ -63,7 +81,7 @@ public class TravelController {
     }
 
 
-    //删除travel
+    //用户删除自己的travel
     //travel中必须包含id
     @PostMapping(value = "travel/deletetravel")
     public void deleteTravel(@RequestBody Travel travel)throws JsonProcessingException{
@@ -93,7 +111,7 @@ public class TravelController {
 
     @PostMapping(value = "travel/test")
     public void test(@RequestBody User user)throws JsonProcessingException{
-        travelService.UserLabel();
+        System.out.print(user.getUsername());
         travelService.similarUser(user);
     }
 
