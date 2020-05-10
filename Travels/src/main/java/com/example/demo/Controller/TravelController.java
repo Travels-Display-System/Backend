@@ -104,8 +104,8 @@ public class TravelController {
     //用户删除自己的travel
     //travel中必须包含id
     @PostMapping(value = "travel/deletetravel")
-    public void deleteTravel(@RequestBody Travel travel)throws JsonProcessingException{
-        travelService.deletetravel(travel);
+    public String deleteTravel(@RequestBody Travel travel)throws JsonProcessingException{
+        return travelService.deletetravel(travel);
     }
 
     //编辑改state
@@ -125,8 +125,8 @@ public class TravelController {
     //管理员删除travel
     //travel中必须包含id
     @PostMapping(value = "travel/deletetravel/admin")
-    public void deleteTravelByAdmin(@RequestBody Travel travel)throws JsonProcessingException{
-        travelService.deleteTravelByAdmin(travel);
+    public String deleteTravelByAdmin(@RequestBody Travel travel)throws JsonProcessingException{
+         return travelService.deleteTravelByAdmin(travel);
     }
 
     @PostMapping(value = "travel/test")

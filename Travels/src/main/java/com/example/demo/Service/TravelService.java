@@ -244,7 +244,10 @@ public class TravelService {
             Travel newTravel=mapper.readValue(strtravel , Travel.class);
             System.out.print(strtravel);
             newTravel.keywordList= mapper.readValue(strtravel.substring(strtravel.indexOf("["),strtravel.lastIndexOf("]")+1),new TypeReference<List<Keyword>>(){});
-            if(newTravel.getUsername().equals(username) && newTravel.getState()==2) travels.add(newTravel);
+            if(newTravel.getState()==2) {
+                if( (username!=null && newTravel.getUsername().equals(username)) || username==null)
+                    travels.add(newTravel);
+            }
         }
 
         travels.sort(new Comparator<Travel>() {
@@ -253,15 +256,7 @@ public class TravelService {
                 return o2.getTimestamp().compareTo(o1.getTimestamp());
             }
         });
-        Integer begin=(page-1)*20;
-        Integer end=begin+20;
-        if(travels.size()<begin){
-            return null;
-        }
-        if(travels.size()<end){
-            end=travels.size();
-        }
-        return travels.subList(begin,end);
+        return travels;
     }
 
     public List<Travel> getTravelSelfno(String username, Integer page) throws JsonProcessingException {
@@ -286,7 +281,10 @@ public class TravelService {
             Travel newTravel=mapper.readValue(strtravel , Travel.class);
             System.out.print(strtravel);
             newTravel.keywordList= mapper.readValue(strtravel.substring(strtravel.indexOf("["),strtravel.lastIndexOf("]")+1),new TypeReference<List<Keyword>>(){});
-            if(newTravel.getUsername().equals(username) && newTravel.getState()!=2) travels.add(newTravel);
+            if(newTravel.getState()!=2) {
+                if( (username!=null && newTravel.getUsername().equals(username)) || username==null)
+                    travels.add(newTravel);
+            }
         }
 
         travels.sort(new Comparator<Travel>() {
@@ -295,15 +293,8 @@ public class TravelService {
                 return o2.getTimestamp().compareTo(o1.getTimestamp());
             }
         });
-        Integer begin=(page-1)*20;
-        Integer end=begin+20;
-        if(travels.size()<begin){
-            return null;
-        }
-        if(travels.size()<end){
-            end=travels.size();
-        }
-        return travels.subList(begin,end);
+
+        return travels;
     }
 
     public Travel getTravelById(Long id) throws JsonProcessingException {
@@ -445,11 +436,11 @@ public class TravelService {
         webSocketServer.sendMessage(newtravel.getUsername(),map.toString());
     }
 
-    public void deletetravel(Travel travel) throws JsonProcessingException {
+    public String deletetravel(Travel travel) throws JsonProcessingException {
         Long id = travel.getId();
         Travel oldtravel = getTravelById(id);
         if(oldtravel==null){
-            return;
+            return "游记不存在";
         }
         List<Keyword> oldkeywords=oldtravel.getKeywordList();
 
@@ -476,6 +467,7 @@ public class TravelService {
         //删除travel
        Url = "http://120.26.184.198:8080/Entity/U36dc49a17fa065/travel/Travel/"+id.toString();
        DatabaseUtils.sendDeleteRequest(Url);
+       return "删除游记成功";
     }
 
     public List<Map> getTravelSimple(String username, String title, String keyword, Integer state, Integer page,Long userid) throws JsonProcessingException {
@@ -504,7 +496,7 @@ public class TravelService {
         }
 
         String result=DatabaseUtils.sendGetRequest(Url);
-        System.out.print(result);
+//        System.out.print(result);
         if(result.equals("{}")){
             return null;
         }
@@ -517,7 +509,10 @@ public class TravelService {
             Travel newTravel=mapper.readValue(strtravel , Travel.class);
             System.out.print(strtravel);
             newTravel.keywordList= mapper.readValue(strtravel.substring(strtravel.indexOf("["),strtravel.lastIndexOf("]")+1),new TypeReference<List<Keyword>>(){});
-            if(newTravel.getUsername().equals(username) && newTravel.getState()==2) travels.add(newTravel);
+            if(newTravel.getState()==2) {
+                if( (username!=null && newTravel.getUsername().equals(username)) || username==null)
+                travels.add(newTravel);
+            }
         }
 
         travels.sort(new Comparator<Travel>() {
@@ -526,6 +521,7 @@ public class TravelService {
                 return o2.getTimestamp().compareTo(o1.getTimestamp());
             }
         });
+        System.out.print(travels);
         List<Map> resultmap=new ArrayList<>();
         for(Travel travel: travels){
             Map<String,Object> map=new HashMap<>();
@@ -534,17 +530,8 @@ public class TravelService {
             map.put("username",travel.getUsername());
             resultmap.add(map);
         }
-
-        Integer begin=(page-1)*20;
-        Integer end=begin+20;
-        if(resultmap.size()<begin){
-            return null;
-        }
-        if(resultmap.size()<end){
-            end=resultmap.size();
-        }
-
-        return resultmap.subList(begin,end);
+        System.out.print(resultmap);
+        return resultmap;
     }
 
     public List<Map> getTravelSimpleSelfno(String username,Integer page) throws JsonProcessingException {
@@ -570,7 +557,10 @@ public class TravelService {
             Travel newTravel=mapper.readValue(strtravel , Travel.class);
             System.out.print(strtravel);
             newTravel.keywordList= mapper.readValue(strtravel.substring(strtravel.indexOf("["),strtravel.lastIndexOf("]")+1),new TypeReference<List<Keyword>>(){});
-            if(newTravel.getUsername().equals(username) && newTravel.getState()!=2) travels.add(newTravel);
+            if(newTravel.getState()!=2) {
+                if( (username!=null && newTravel.getUsername().equals(username)) || username==null)
+                    travels.add(newTravel);
+            }
         }
 
         travels.sort(new Comparator<Travel>() {
@@ -587,24 +577,14 @@ public class TravelService {
             map.put("username",travel.getUsername());
             resultmap.add(map);
         }
-
-        Integer begin=(page-1)*20;
-        Integer end=begin+20;
-        if(resultmap.size()<begin){
-            return null;
-        }
-        if(resultmap.size()<end){
-            end=resultmap.size();
-        }
-
-        return resultmap.subList(begin,end);
+        return resultmap;
     }
 
-    public void deleteTravelByAdmin(Travel travel) throws JsonProcessingException {
+    public String deleteTravelByAdmin(Travel travel) throws JsonProcessingException {
         Long id = travel.getId();
         Travel oldtravel = getTravelById(id);
         if(oldtravel==null){
-            return;
+            return "游记不存在";
         }
         List<Keyword> oldkeywords=oldtravel.getKeywordList();
 
@@ -637,6 +617,8 @@ public class TravelService {
         map.put("travelId",id);
 
         webSocketServer.sendMessage(oldtravel.getUsername(),map.toString());
+
+        return "删除游记成功";
     }
 
     public void UserLabel() throws JsonProcessingException {
